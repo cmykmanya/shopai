@@ -102,11 +102,11 @@ export default function HomePage() {
           >
             <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
               <Sparkles className="mr-2 h-4 w-4" />
-              AI-Powered Shopping
+              AI Destekli Alışveriş
             </Badge>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <TypingEffect text="Discover Your Style with AI" className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60" />
+              <TypingEffect text="Tarzınızı AI ile Keşfedin" className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60" />
             </h1>
 
             <motion.p
@@ -115,7 +115,7 @@ export default function HomePage() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-xl md:text-2xl text-muted-foreground mb-8"
             >
-              Experience personalized fashion recommendations powered by advanced AI technology
+              Gelişmiş AI teknolojisi ile güçlendirilen kişiselleştirilmiş moda önerileri deneyin
             </motion.p>
 
             <motion.div
@@ -127,12 +127,12 @@ export default function HomePage() {
               <Button size="lg" className="text-lg px-8 py-6" asChild>
                 <Link href="/products">
                   <ShoppingBag className="mr-2 h-5 w-5" />
-                  Shop Now
+                  Hemen Alışveriş Yap
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
                 <Link href="/style-quiz">
-                  Take Style Quiz
+                  Stil Testi Çöz
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

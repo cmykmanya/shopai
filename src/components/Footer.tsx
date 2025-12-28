@@ -9,28 +9,28 @@ import { Separator } from '@/components/ui/separator';
 export function Footer() {
   const footerLinks = {
     about: [
-      { label: 'About Us', href: '/about' },
-      { label: 'Our Story', href: '/about#story' },
-      { label: 'Careers', href: '/careers' },
+      { label: 'Hakkımızda', href: '/about' },
+      { label: 'Hikayemiz', href: '/about#story' },
+      { label: 'Kariyer', href: '/careers' },
       { label: 'Blog', href: '/blog' }
     ],
     shop: [
-      { label: 'New Arrivals', href: '/products?sort=newest' },
-      { label: 'Best Sellers', href: '/products?sort=bestselling' },
-      { label: 'Sale', href: '/products?sale=true' },
-      { label: 'Gift Cards', href: '/gift-cards' }
+      { label: 'Yeni Gelenler', href: '/products?sort=newest' },
+      { label: 'En Çok Satanlar', href: '/products?sort=bestselling' },
+      { label: 'İndirim', href: '/products?sale=true' },
+      { label: 'Hediye Kartları', href: '/gift-cards' }
     ],
     support: [
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'FAQs', href: '/faq' },
-      { label: 'Shipping Info', href: '/shipping' },
-      { label: 'Returns', href: '/returns' }
+      { label: 'İletişim', href: '/contact' },
+      { label: 'Sıkça Sorulan Sorular', href: '/faq' },
+      { label: 'Kargo Bilgisi', href: '/shipping' },
+      { label: 'İadeler', href: '/returns' }
     ],
     legal: [
-      { label: 'Privacy Policy', href: '/privacy' },
-      { label: 'Terms of Service', href: '/terms' },
-      { label: 'Cookie Policy', href: '/cookies' },
-      { label: 'Accessibility', href: '/accessibility' }
+      { label: 'Gizlilik Politikası', href: '/privacy' },
+      { label: 'Hizmet Şartları', href: '/terms' },
+      { label: 'Çerez Politikası', href: '/cookies' },
+      { label: 'Erişilebilirlik', href: '/accessibility' }
     ]
   };
 
@@ -43,37 +43,37 @@ export function Footer() {
 
   return (
     <footer className="bg-muted/50">
-      {/* Newsletter Section */}
+      {/* Bülten Bölümü */}
       <div className="border-b bg-background">
         <div className="container mx-auto px-4 py-12">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-2 text-2xl font-bold">
-              Join Our Newsletter
+              Bültenimize Abone Olun
             </h2>
             <p className="mb-6 text-muted-foreground">
-              Subscribe to get special offers, free giveaways, and exclusive deals.
+              Özel fırsatlar, yeni ürünler ve keşif haberlerinden haberdar olun.
             </p>
             <div className="flex gap-2 sm:flex-row">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="E-posta adresinizi"
                 className="flex-1"
               />
-              <Button>Subscribe</Button>
+              <Button>Abone Ol</Button>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              By subscribing, you agree to our Privacy Policy and consent to receive updates.
+              Abone olarak Gizlilik Politikasını kabul ediyorsunuz.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Main Footer */}
+      {/* Ana Footer */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* About Column */}
+          {/* Hakkımızda Bölümü */}
           <div className="space-y-4">
-            <h3 className="font-semibold">About</h3>
+            <h3 className="font-semibold">Hakkımızda</h3>
             <ul className="space-y-2">
               {footerLinks.about.map((link) => (
                 <li key={link.href}>
@@ -88,9 +88,9 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Shop Column */}
+          {/* Mağaza Bölümü */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Shop</h3>
+            <h3 className="font-semibold">Mağaza</h3>
             <ul className="space-y-2">
               {footerLinks.shop.map((link) => (
                 <li key={link.href}>
@@ -105,9 +105,9 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Support Column */}
+          {/* Destek Bölümü */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Support</h3>
+            <h3 className="font-semibold">Destek</h3>
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.href}>
@@ -122,9 +122,9 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Legal Column */}
+          {/* Yasal Bölümü */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Legal</h3>
+            <h3 className="font-semibold">Yasal</h3>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
@@ -140,10 +140,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Social Links & Payment Methods */}
-        <Separator className="my-8" />
+        {/* Sosyal Medya Linkleri ve Ödeme Yöntemleri */}
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          {/* Social Links */}
+          {/* Sosyal Medya Linkleri */}
           <div className="flex gap-4">
             {socialLinks.map((social) => (
               <Link
@@ -157,9 +156,9 @@ export function Footer() {
             ))}
           </div>
 
-          {/* Payment Methods */}
+          {/* Ödeme Yöntemleri */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>We Accept:</span>
+            <span>Kabul Ettiğimiz:</span>
             <div className="flex gap-2">
               <div className="flex h-8 w-12 items-center justify-center rounded border bg-background font-bold">
                 Visa
@@ -177,16 +176,15 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <Separator className="my-8" />
+        {/* Telif Hakkı */}
         <div className="flex flex-col gap-4 text-center text-sm text-muted-foreground md:flex-row md:justify-between md:text-left">
-          <p>&copy; {new Date().getFullYear()} ShopAI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} ShopAI. Tüm hakları saklıdır.</p>
           <div className="flex gap-4 justify-center md:justify-start">
             <Link href="/privacy" className="hover:text-foreground">
-              Privacy Policy
+              Gizlilik Politikası
             </Link>
             <Link href="/terms" className="hover:text-foreground">
-              Terms of Service
+              Hizmet Şartları
             </Link>
           </div>
         </div>

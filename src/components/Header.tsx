@@ -41,10 +41,10 @@ export function Header() {
   const isHomePage = pathname === '/';
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/products', label: 'Shop' },
-    { href: '/style-quiz', label: 'Style Quiz' },
-    { href: '/account', label: 'Account' }
+    { href: '/', label: 'Ana Sayfa' },
+    { href: '/products', label: 'Mağaza' },
+    { href: '/style-quiz', label: 'Stil Testi' },
+    { href: '/account', label: 'Hesabım' }
   ];
 
   return (
@@ -57,9 +57,9 @@ export function Header() {
         }`}
       >
         <div className="container mx-auto px-4">
-          {/* Top Bar */}
+          {/* Üst Bar */}
           <div className="flex h-16 items-center justify-between">
-            {/* Mobile Menu Button */}
+            {/* Mobil Menü Butonu */}
             <Sheet open={isMenuOpen} onOpenChange={toggleMenu}>
               <SheetTrigger asChild>
                 <Button
@@ -96,7 +96,7 @@ export function Header() {
               <span className="text-2xl font-bold">ShopAI</span>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Masaüstü Navigasyon */}
             <nav className="hidden lg:flex items-center space-x-8">
               {navLinks.map((link) => (
                 <Link
@@ -113,7 +113,7 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Search Button */}
+            {/* Arama Butonu */}
             <Button
               variant="ghost"
               size="icon"
@@ -123,16 +123,16 @@ export function Header() {
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Right Icons */}
+            {/* Sağ İkonlar */}
             <div className="flex items-center space-x-2">
-              {/* Wishlist */}
+              {/* Favoriler */}
               <Link href="/account">
                 <Button variant="ghost" size="icon" className="relative">
                   <Heart className="h-5 w-5" />
                 </Button>
               </Link>
 
-              {/* Cart */}
+              {/* Sepet */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -150,7 +150,7 @@ export function Header() {
                 )}
               </Button>
 
-              {/* Account */}
+              {/* Hesapım */}
               <Link href="/account">
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />
@@ -159,13 +159,13 @@ export function Header() {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
+          {/* Mobil Arama Çubuğu */}
           <div className="pb-4 lg:hidden">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search products..."
+                placeholder="Ürün ara..."
                 className="pl-10"
               />
             </div>
@@ -173,7 +173,7 @@ export function Header() {
         </div>
       </header>
 
-      {/* Search Overlay */}
+      {/* Arama Overlay */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div
@@ -187,7 +187,7 @@ export function Header() {
                 <Search className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search products..."
+                  placeholder="Ürün ara..."
                   className="h-14 pl-12 text-lg"
                   autoFocus
                 />
@@ -201,9 +201,9 @@ export function Header() {
                 </Button>
               </div>
               <div className="mt-8">
-                <p className="text-sm text-muted-foreground mb-4">Trending searches:</p>
+                <p className="text-sm text-muted-foreground mb-4">Popüler aramalar:</p>
                 <div className="flex flex-wrap gap-2">
-                  {['Summer Dress', 'Running Shoes', 'Denim Jacket', 'Smart Watch'].map(
+                  {['Yaz Elbisesi', 'Spor Ayakkabısı', 'Denim Ceketi', 'Akıllı Saat'].map(
                     (term) => (
                       <Button
                         key={term}
@@ -225,7 +225,7 @@ export function Header() {
         )}
       </AnimatePresence>
 
-      {/* Cart Drawer */}
+      {/* Sepet Çekmecesi */}
       <CartDrawer />
     </>
   );

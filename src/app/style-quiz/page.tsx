@@ -1,516 +1,371 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuizStore } from '@/lib/store/ui-store';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Skip, Sparkles, ArrowRight, RotateCcw } from 'lucide-react';
-import Link from 'next/link';
+import { Sparkles, ChevronRight, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
-import { products } from '@/lib/mock-data';
-import { ProductCard } from '@/components/ProductCard';
 
-type QuizStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-
-type AnswerValue = string | number | string[] | null;
-
-interface Question {
-  id: number;
-  title: string;
-  description?: string;
-  type: 'single' | 'multiple' | 'color' | 'slider' | 'image';
-  options?: Array<{ value: string | number; label: string; image?: string }>;
-  min?: number;
-  max?: number;
-  step?: number;
-}
-
-const questions: Question[] = [
+const quizQuestions = [
   {
     id: 1,
-    title: 'What is your gender preference?',
-    type: 'single',
+    question: 'Tarzınız nedir?',
     options: [
-      { value: 'male', label: 'Male' },
-      { value: 'female', label: 'Female' },
-      { value: 'unisex', label: 'Unisex' },
+      { value: 'casual', label: 'Günlük / Rahat', icon: '👕' },
+      { value: 'formal', label: 'Formal / Şık', icon: '👔' },
+      { value: 'sporty', label: 'Spor / Aktif', icon: '🏃' },
+      { value: 'bohemian', label: 'Bohem / Özgür Ruh', icon: '🎭' },
+      { value: 'vintage', label: 'Klasik / Vintage', icon: '👗' },
     ],
   },
   {
     id: 2,
-    title: 'What is your preferred style?',
-    type: 'image',
+    question: 'Vücut tipiniz nedir?',
     options: [
-      { value: 'casual', label: 'Casual', image: '/api/placeholder/200/200' },
-      { value: 'formal', label: 'Formal', image: '/api/placeholder/200/200' },
-      { value: 'sporty', label: 'Sporty', image: '/api/placeholder/200/200' },
-      { value: 'bohemian', label: 'Bohemian', image: '/api/placeholder/200/200' },
+      { value: 'hourglass', label: 'Kum Saati' },
+      { value: 'pear', label: 'Armut' },
+      { value: 'rectangle', label: 'Dikdörtgen' },
+      { value: 'inverted-triangle', label: 'Ters Üçgen' },
+      { value: 'oval', label: 'Oval' },
     ],
   },
   {
     id: 3,
-    title: 'What are your favorite colors?',
-    type: 'color',
+    question: 'Hangi kıyafet parçalarını seversiniz?',
     options: [
-      { value: '#000000', label: 'Black' },
-      { value: '#FFFFFF', label: 'White' },
-      { value: '#808080', label: 'Gray' },
-      { value: '#FF0000', label: 'Red' },
-      { value: '#0000FF', label: 'Blue' },
-      { value: '#008000', label: 'Green' },
-      { value: '#FFB6C1', label: 'Pink' },
-      { value: '#FFA500', label: 'Orange' },
+      { value: 'dresses', label: 'Elbiseler' },
+      { value: 'pants', label: 'Pantolonlar' },
+      { value: 'jackets', label: 'Ceketler' },
+      { value: 'accessories', label: 'Aksesuarlar' },
+      { value: 'shoes', label: 'Ayakkabılar' },
     ],
   },
   {
     id: 4,
-    title: 'What is your budget range?',
-    description: 'Per item',
-    type: 'slider',
-    min: 0,
-    max: 500,
-    step: 10,
+    question: 'Renk paletiniz hangisi?',
+    options: [
+      { value: 'neutral', label: 'Nötr', colors: ['#000000', '#FFFFFF', '#808080'] },
+      { value: 'warm', label: 'Sıcak', colors: ['#FF6B6B', '#FFE66D', '#F06595'] },
+      { value: 'cool', label: 'Soğuk', colors: ['#4A90E2', '#45B7D1', '#96CEB4'] },
+      { value: 'pastel', label: 'Pastel', colors: ['#FFB6C1', '#DDA0DD', '#98D8C8'] },
+    ],
   },
   {
     id: 5,
-    title: 'For what occasions do you dress?',
-    type: 'multiple',
+    question: 'Yaş grubunuz nedir?',
     options: [
-      { value: 'work', label: 'Work' },
-      { value: 'party', label: 'Party' },
-      { value: 'gym', label: 'Gym' },
-      { value: 'casual', label: 'Casual' },
-      { value: 'formal', label: 'Formal Events' },
-      { value: 'date', label: 'Date Night' },
+      { value: '18-24', label: '18-24' },
+      { value: '25-34', label: '25-34' },
+      { value: '35-44', label: '35-44' },
+      { value: '45+', label: '45+' },
     ],
   },
   {
     id: 6,
-    title: 'What fit do you prefer?',
-    type: 'single',
+    question: 'Hangi mevsim için giyinmek istiyorsunuz?',
     options: [
-      { value: 'slim', label: 'Slim' },
-      { value: 'regular', label: 'Regular' },
-      { value: 'loose', label: 'Loose' },
-      { value: 'relaxed', label: 'Relaxed' },
+      { value: 'spring', label: 'İlkbahar' },
+      { value: 'summer', label: 'Yaz' },
+      { value: 'fall', label: 'Sonbahar' },
+      { value: 'winter', label: 'Kış' },
     ],
   },
   {
     id: 7,
-    title: 'What patterns do you like?',
-    type: 'single',
+    question: 'Bütçeniz hangi aralıkta?',
     options: [
-      { value: 'solid', label: 'Solid Colors' },
-      { value: 'stripes', label: 'Stripes' },
-      { value: 'prints', label: 'Floral Prints' },
-      { value: 'plaid', label: 'Plaid/Checkered' },
+      { value: 'budget', label: 'Ekonomik' },
+      { value: 'mid', label: 'Orta' },
+      { value: 'premium', label: 'Premium' },
     ],
   },
   {
     id: 8,
-    title: 'What materials do you prefer?',
-    type: 'multiple',
+    question: 'Hangi markaları seviyorsunuz?',
     options: [
-      { value: 'cotton', label: 'Cotton' },
-      { value: 'denim', label: 'Denim' },
-      { value: 'silk', label: 'Silk' },
-      { value: 'leather', label: 'Leather' },
-      { value: 'linen', label: 'Linen' },
-      { value: 'wool', label: 'Wool' },
+      { value: 'zara', label: 'Zara' },
+      { value: 'h-m', label: 'H&M' },
+      { value: 'nike', label: 'Nike' },
+      { value: 'gucci', label: 'Gucci' },
+      { value: 'other', label: 'Diğer' },
     ],
   },
   {
     id: 9,
-    title: 'What brand affinity do you have?',
-    type: 'single',
+    question: 'Hangi özellikler size önemli?',
     options: [
-      { value: 'luxury', label: 'Luxury Brands' },
-      { value: 'mid-range', label: 'Mid-Range Brands' },
-      { value: 'budget', label: 'Budget-Friendly' },
-      { value: 'any', label: 'I\'m Open to Any' },
+      { value: 'comfort', label: 'Rahatlık' },
+      { value: 'style', label: 'Stil' },
+      { value: 'quality', label: 'Kalite' },
+      { value: 'price', label: 'Fiyat' },
     ],
   },
   {
     id: 10,
-    title: 'Upload an inspiration image (optional)',
-    description: 'Show us styles you love',
-    type: 'single',
+    question: 'Kategorilerden hangisini incelemek istersiniz?',
     options: [
-      { value: 'upload', label: 'Upload Image' },
-      { value: 'skip', label: 'Skip' },
+      { value: 'casual', label: 'Günlük' },
+      { value: 'formal', label: 'Formal' },
+      { value: 'sporty', label: 'Spor' },
+      { value: 'accessories', label: 'Aksesuarlar' },
     ],
   },
 ];
 
+const styleProfiles = {
+  'casual': {
+    title: 'Rahat ve Şık',
+    description: 'Günlük giyim tarzınızda rahatlık ve şıklığı birleştirir.',
+  },
+  'formal': {
+    title: 'Elegan ve Profesyonel',
+    description: 'İş ve özel günleriniz için sofistike ve profesyonel görünüm.',
+  },
+  'sporty': {
+    title: 'Aktif ve Dinamik',
+    description: 'Spor aktiviteleriniz için performans odaklı kıyafetler.',
+  },
+  'bohemian': {
+    title: 'Özgür ve Sanatsal',
+    description: 'Bohem tarzınızla bireyselliğinizi ve özgünlüğünüzü ifade edin.',
+  },
+  'vintage': {
+    title: 'Klasik ve Zaman Ötesi',
+    description: 'Vintage parçalarla modern bir dokunuş yaratın.',
+  },
+};
+
 export default function StyleQuizPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<QuizStep>(1);
-  const [answers, setAnswers] = useState<Record<number, AnswerValue>>({});
+  const [currentStep, setCurrentStep] = useState(1);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isCompleted, setIsCompleted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<{
-    styleProfile: string;
-    description: string;
-    recommendedProducts: typeof products;
-  } | null>(null);
+  const [resultProfile, setResultProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  const currentQuestion = questions[currentStep - 1];
-  const progress = ((currentStep - 1) / questions.length) * 100;
+  const currentQuestion = quizQuestions.find((q) => q.id === currentStep);
+  const progress = (currentStep / quizQuestions.length) * 100;
 
-  const handleAnswer = (value: AnswerValue) => {
-    setAnswers({ ...answers, [currentQuestion.id]: value });
-  };
-
-  const handleNext = () => {
-    if (currentStep < questions.length) {
-      setCurrentStep((currentStep + 1) as QuizStep);
-    } else {
-      handleSubmitQuiz();
-    }
+  const handleAnswer = (value: string) => {
+    setAnswers({ ...answers, [currentStep]: value });
+    setTimeout(() => {
+      if (currentStep < quizQuestions.length) {
+        setCurrentStep(currentStep + 1);
+      }
+    }, 300);
   };
 
   const handlePrevious = () => {
     if (currentStep > 1) {
-      setCurrentStep((currentStep - 1) as QuizStep);
+      setCurrentStep(currentStep - 1);
     }
   };
 
-  const handleSkip = () => {
-    setAnswers({ ...answers, [currentQuestion.id]: null });
-    if (currentStep < questions.length) {
-      setCurrentStep((currentStep + 1) as QuizStep);
-    } else {
-      handleSubmitQuiz();
-    }
+  const handleCalculateResult = () => {
+    setLoading(true);
+    setTimeout(() => {
+      const mostCommon = Object.values(answers).reduce((a, b, i, arr) => {
+        arr[a] = (arr[a] || 0) + 1;
+        return arr[a] >= (arr[b] || 0) ? a : b;
+      }, {} as Record<string, number>);
+
+      setResultProfile(mostCommon);
+      setIsCompleted(true);
+      setLoading(false);
+    }, 2000);
   };
 
-  const handleSubmitQuiz = async () => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    // Generate mock results
-    const gender = answers[1] || 'unisex';
-    const style = answers[2] || 'casual';
-    const budget = answers[4] || 200;
-
-    const styleProfiles: Record<string, { title: string; description: string }> = {
-      'casual-male': {
-        title: 'Casual Comfort',
-        description: 'You prefer laid-back, comfortable pieces that still look polished. Your style is effortless and practical, perfect for everyday wear.',
-      },
-      'casual-female': {
-        title: 'Chic & Relaxed',
-        description: 'You love comfortable yet stylish pieces that transition easily from day to night. Your style is feminine and approachable.',
-      },
-      'formal-male': {
-        title: 'Classic Gentleman',
-        description: 'You appreciate timeless elegance and quality tailoring. Your style reflects sophistication and attention to detail.',
-      },
-      'formal-female': {
-        title: 'Elegant Professional',
-        description: 'You value polished, sophisticated looks that make a statement. Your style is refined and fashion-forward.',
-      },
-      'sporty-male': {
-        title: 'Active Athlete',
-        description: 'You love performance wear that doesn't compromise on style. Your look is energetic and ready for action.',
-      },
-      'sporty-female': {
-        title: 'Sporty Chic',
-        description: 'You combine athletic wear with trendy pieces for a look that's both functional and fashionable.',
-      },
-      'bohemian': {
-        title: 'Free Spirit',
-        description: 'You embrace eclectic, artistic pieces that express your individuality. Your style is unconventional and expressive.',
-      },
-    };
-
-    const profileKey = `${style}-${gender}` as keyof typeof styleProfiles;
-    const profile = styleProfiles[profileKey] || styleProfiles['casual-male'];
-
-    // Get recommended products based on budget
-    const recommendedProducts = products
-      .filter(p => p.price <= budget && p.category !== 'Kids')
-      .slice(0, 6);
-
-    setResults({
-      styleProfile: profile.title,
-      description: profile.description,
-      recommendedProducts,
-    });
-
-    setIsLoading(false);
-    setIsCompleted(true);
+  const getRecommendedProducts = (profile: string) => {
+    if (profile === 'casual') return [1, 7, 15];
+    if (profile === 'formal') return [2, 5, 12];
+    if (profile === 'sporty') return [4, 10, 18];
+    if (profile === 'bohemian') return [3, 9, 11];
+    return [6, 8, 14];
   };
 
-  const handleRetakeQuiz = () => {
+  const handleRestart = () => {
     setCurrentStep(1);
     setAnswers({});
     setIsCompleted(false);
-    setResults(null);
+    setResultProfile(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            className="inline-block"
-          >
-            <Sparkles className="h-16 w-16 text-primary mx-auto" />
-          </motion.div>
-          <h2 className="text-2xl font-bold mt-6 mb-2">Analyzing Your Style...</h2>
-          <p className="text-muted-foreground">
-            Our AI is learning your preferences
-          </p>
-          <Progress value={66} className="mt-8 max-w-md mx-auto" />
-        </div>
-      </div>
-    );
-  }
-
-  if (isCompleted && results) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
-          {/* Results Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
-              <Sparkles className="h-4 w-4" />
-              <span className="font-medium">Your Style Profile</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {results.styleProfile}
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              {results.description}
-            </p>
-          </motion.div>
-
-          {/* Recommended Products */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="text-2xl font-bold">Recommended For You</h2>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {results.recommendedProducts.map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center mt-12"
-          >
-            <Button size="lg" onClick={handleRetakeQuiz} variant="outline">
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Retake Quiz
-            </Button>
-            <Button size="lg" asChild>
-              <Link href="/products">
-                Shop All Products
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            AI Style Quiz
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Answer a few questions to get personalized style recommendations
-          </p>
-        </div>
-
-        {/* Progress */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Question {currentStep} of {questions.length}</span>
-            <span className="font-medium">{Math.round(progress)}% Complete</span>
-          </div>
-          <Progress value={progress} />
-        </div>
-
-        {/* Question Card */}
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="border rounded-lg p-6 md:p-8 space-y-6"
-        >
-          <div>
-            <Badge className="mb-3" variant="outline">
-              {currentQuestion.type === 'single' && 'Single Choice'}
-              {currentQuestion.type === 'multiple' && 'Multiple Choice'}
-              {currentQuestion.type === 'color' && 'Select Colors'}
-              {currentQuestion.type === 'slider' && 'Slider'}
-              {currentQuestion.type === 'image' && 'Image Selection'}
-            </Badge>
-            <h2 className="text-2xl font-bold mb-2">{currentQuestion.title}</h2>
-            {currentQuestion.description && (
-              <p className="text-muted-foreground">{currentQuestion.description}</p>
-            )}
-          </div>
-
-          {/* Options */}
-          {currentQuestion.type === 'slider' && (
-            <div className="space-y-4">
-              <Slider
-                value={[answers[currentQuestion.id] || currentQuestion.min || 0]}
-                onValueChange={(value) => handleAnswer(value[0])}
-                min={currentQuestion.min || 0}
-                max={currentQuestion.max || 500}
-                step={currentQuestion.step || 10}
-              />
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>${currentQuestion.min || 0}</span>
-                <span className="text-lg font-bold">
-                  ${answers[currentQuestion.id] || currentQuestion.min || 0}
-                </span>
-                <span>${currentQuestion.max || 500}</span>
-              </div>
-            </div>
-          )}
-
-          {currentQuestion.type === 'color' && (
-            <div className="grid grid-cols-4 gap-4">
-              {currentQuestion.options?.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    const current = answers[currentQuestion.id] || [];
-                    if (current.includes(option.value)) {
-                      handleAnswer(current.filter((v: string) => v !== option.value));
-                    } else {
-                      handleAnswer([...current, option.value]);
-                    }
-                  }}
-                  className={`relative aspect-square rounded-full border-2 transition-all ${
-                    (answers[currentQuestion.id] || []).includes(option.value)
-                      ? 'border-primary ring-4 ring-primary/20'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  style={{ backgroundColor: option.value as string }}
-                  title={option.label}
-                >
-                  {(answers[currentQuestion.id] || []).includes(option.value) && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-6 h-6 rounded-full bg-white/80" />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {currentQuestion.type === 'single' && currentQuestion.options && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {currentQuestion.options.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleAnswer(option.value)}
-                  className={`p-4 border-2 rounded-lg text-left transition-all ${
-                    answers[currentQuestion.id] === option.value
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <span className="font-medium">{option.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {currentQuestion.type === 'multiple' && currentQuestion.options && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {currentQuestion.options.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => {
-                    const current = answers[currentQuestion.id] || [];
-                    if (current.includes(option.value)) {
-                      handleAnswer(current.filter((v: string) => v !== option.value));
-                    } else {
-                      handleAnswer([...current, option.value]);
-                    }
-                  }}
-                  className={`p-4 border-2 rounded-lg text-left transition-all ${
-                    (answers[currentQuestion.id] || []).includes(option.value)
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      checked={(answers[currentQuestion.id] || []).includes(option.value)}
-                      readOnly
-                    />
-                    <span className="font-medium">{option.label}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between pt-6 border-t">
-            <Button
-              variant="ghost"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleSkip}>
-                <Skip className="mr-2 h-4 w-4" />
-                Skip
-              </Button>
-              <Button onClick={handleNext}>
-                {currentStep === questions.length ? 'Get Results' : 'Next'}
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Exit Quiz */}
-        <div className="text-center mt-6">
-          <Button variant="ghost" asChild>
-            <Link href="/">Save & Exit</Link>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-purple-600" />
+            <span className="text-xl font-bold">AI Style Quiz</span>
+          </Link>
+          <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
+            <ChevronRight className="h-5 w-5 rotate-180" />
           </Button>
         </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {!isCompleted ? (
+          <>
+            {/* Progress */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-2xl font-bold">Soru {currentStep} / {quizQuestions.length}</h2>
+                <span className="text-sm text-purple-600 font-medium">{Math.round(progress)}% Tamamlandı</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+
+            {/* Question Card */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                className="bg-white rounded-2xl shadow-xl p-8"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <h3 className="text-2xl font-bold mb-8 text-center">
+                    {currentQuestion?.question}
+                  </h3>
+
+                  <RadioGroup
+                    value={answers[currentStep]}
+                    onValueChange={handleAnswer}
+                  >
+                    <div className="space-y-3">
+                      {currentQuestion?.options.map((option) => (
+                        <motion.div
+                          key={option.value}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: option.value === answers[currentStep] ? 0 : 0.1 }}
+                        >
+                          <RadioGroupItem
+                            value={option.value}
+                            id={`option-${option.value}`}
+                            className="cursor-pointer border-2 rounded-xl p-4 hover:border-purple-500 transition-all data-[state=checked]:border-purple-500 data-[state=checked]:bg-purple-50"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-5 h-5 flex-shrink-0">
+                                <div className="w-5 h-5 rounded-full border-2 border-purple-300 flex items-center justify-center">
+                                                                  <div className="w-2 h-2 rounded-full bg-purple-500" />
+                                                                </div>
+                              </div>
+                              <div className="flex-1">
+                                                                <Label
+                                                                  htmlFor={`option-${option.value}`}
+                                                                  className="font-medium text-base cursor-pointer"
+                                                                >
+                                                                  {option.label}
+                                                                </Label>
+                                                                {option.colors && (
+                                                                  <div className="flex gap-1 mt-2">
+                                                                    {option.colors.map((color) => (
+                                                                      <div
+                                                                        key={color}
+                                                                        className="w-6 h-6 rounded-full border-2"
+                                                                        style={{ backgroundColor: color }}
+                                                                      />
+                                                                    ))}
+                                                                  </div>
+                                                                )}
+                                                              </div>
+                                                            </div>
+                                                        </RadioGroupItem>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </RadioGroup>
+
+                  {/* Navigation */}
+                  <div className="flex justify-between mt-8">
+                    {currentStep > 1 && (
+                      <Button variant="outline" onClick={handlePrevious}>
+                        Önceki
+                      </Button>
+                    )}
+                    {currentStep === quizQuestions.length ? (
+                      <Button size="lg" className="flex-1" onClick={handleCalculateResult} disabled={loading}>
+                        {loading ? 'Hesaplanıyor...' : 'Sonuçları Gör'}
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" disabled>
+                        İleri
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
+          </>
+        ) : (
+          /* Results Page */
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl p-8"
+          >
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-purple-600" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">
+                Style Profiliniz: {styleProfiles[resultProfile]?.title}
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                {styleProfiles[resultProfile]?.description}
+              </p>
+            </div>
+
+            {/* Recommended Products */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold mb-4">Sizin İçin Seçilen Ürünler</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {getRecommendedProducts(resultProfile).map((productId, index) => (
+                  <motion.div
+                    key={productId}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="border rounded-lg p-4 hover:border-purple-500 transition-colors"
+                  >
+                    <div className="aspect-[3/4] bg-muted rounded-lg mb-2" />
+                    <h4 className="font-medium">Ürün {productId}</h4>
+                    <Button variant="outline" size="sm" className="w-full mt-2">
+                      İncele
+                    </Button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-4">
+              <Button size="lg" className="flex-1" onClick={() => router.push('/products')}>
+                Tüm Ürünleri İncele
+              </Button>
+              <Button size="lg" variant="outline" className="flex-1" onClick={handleRestart}>
+                Testi Yeniden Çöz
+              </Button>
+            </div>
+          </motion.div>
+        )}
       </div>
+
+      {/* Footer */}
+      <footer className="py-8 text-center text-sm text-muted-foreground">
+        <p>Tarzınızı AI ile keşfedin! Powered by ShopAI</p>
+      </footer>
     </div>
   );
 }
