@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { db } from '@/lib/db';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,25 +16,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "ShopAI - AI-Powered E-Commerce Platform",
-  description: "Discover your perfect style with AI-powered recommendations. Shop the latest trends in fashion, accessories, and more.",
-  keywords: ["ShopAI", "AI", "e-commerce", "fashion", "shopping", "style quiz", "personalized recommendations"],
+export async function generateMetadata(): Promise<Metadata> {
+  const seoSettings = await db.sEOSettings.findFirst();
+
+  return {
+    title: seoSettings?.siteName || "ShopAI - AI-Powered E-Commerce Platform",
+    description: seoSettings?.siteDescription || "Discover your perfect style with AI-powered recommendations. Shop the latest trends in fashion, accessories, and more.",
+    keywords: seoSettings?.keywords?.split(',') || ["ShopAI", "AI", "e-commerce", "fashion", "shopping", "style quiz", "personalized recommendations"],
   authors: [{ name: "ShopAI Team" }],
   icons: {
     icon: "/logo.svg",
   },
   openGraph: {
-    title: "ShopAI - AI-Powered E-Commerce",
-    description: "Discover your perfect style with AI-powered recommendations",
+      title: seoSettings?.siteName || "ShopAI - AI-Powered E-Commerce",
+      description: seoSettings?.siteDescription || "Discover your perfect style with AI-powered recommendations",
     type: "website",
+      images: [seoSettings?.ogImage || '/og-image.jpg'],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ShopAI - AI-Powered E-Commerce",
-    description: "Discover your perfect style with AI-powered recommendations",
+      title: seoSettings?.siteName || "ShopAI - AI-Powered E-Commerce",
+      description: seoSettings?.siteDescription || "Discover your perfect style with AI-powered recommendations",
+      images: [seoSettings?.twitterCard || '/twitter-card.jpg'],
   },
 };
+}
 
 export default function RootLayout({
   children,
@@ -55,3 +62,4 @@ export default function RootLayout({
     </html>
   );
 }
+
