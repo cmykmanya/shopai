@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { DefaultSeo } from "next-seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,22 +17,45 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ShopAI - AI-Powered E-Commerce Platform",
-  description: "Discover your perfect style with AI-powered recommendations. Shop the latest trends in fashion, accessories, and more.",
-  keywords: ["ShopAI", "AI", "e-commerce", "fashion", "shopping", "style quiz", "personalized recommendations"],
-  authors: [{ name: "ShopAI Team" }],
+  title: {
+    default: "ShopAI - Yapay Zeka Destekli Alışveriş Platformu",
+    template: "%s | ShopAI",
+  },
+  description: "Yapay zeka destekli önerilerle mükemmel stilinizi keşfedin. Moda, aksesuar ve daha fazlasında en yeni trendleri keşfedin.",
+  keywords: ["ShopAI", "yapay zeka", "e-ticaret", "moda", "alışveriş", "stil testi", "kişiselleştirilmiş öneriler", "trendler", "giyim", "aksesuar"],
+  authors: [{ name: "ShopAI Ekibi" }],
   icons: {
     icon: "/logo.svg",
   },
   openGraph: {
-    title: "ShopAI - AI-Powered E-Commerce",
-    description: "Discover your perfect style with AI-powered recommendations",
+    title: "ShopAI - Yapay Zeka Destekli Alışveriş",
+    description: "Yapay zeka destekli önerilerle mükemmel stilinizi keşfedin",
     type: "website",
+    locale: "tr_TR",
+    url: "https://shopai.com.tr",
+    siteName: "ShopAI",
+    images: [
+      {
+        url: "https://shopai.com.tr/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "ShopAI - Yapay Zeka Destekli Alışveriş",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ShopAI - AI-Powered E-Commerce",
-    description: "Discover your perfect style with AI-powered recommendations",
+    title: "ShopAI - Yapay Zeka Destekli Alışveriş",
+    description: "Yapay zeka destekli önerilerle mükemmel stilinizi keşfedin",
+    images: ["https://shopai.com.tr/og-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
   },
 };
 
@@ -41,7 +65,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="tr" suppressHydrationWarning>
+      <head>
+        <DefaultSeo
+          openGraph={{
+            type: "website",
+            locale: "tr_TR",
+            url: "https://shopai.com.tr",
+            site_name: "ShopAI",
+          }}
+          twitter={{
+            cardType: "summary_large_image",
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >

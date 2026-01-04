@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Product } from '@/lib/mock-data';
 import { useCartStore } from '@/lib/store/cart-store';
@@ -41,8 +41,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         colorHex: product.colors[0].hex
       }
     });
-
-    showToast('Added to cart!', 'success');
+    
+    showToast('Ürün sepete eklendi!', 'success');
   };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
@@ -51,8 +51,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     toggleWishlist(product.id);
     showToast(
       isInWishlist(product.id)
-        ? 'Removed from wishlist'
-        : 'Added to wishlist',
+        ? 'İstek listesinden çıkarıldı'
+        : 'İstek listesine eklendi',
       'success'
     );
   };
@@ -66,7 +66,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     >
       <Link href={`/products/${product.id}`}>
         <div className="relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all duration-300 hover:shadow-lg">
-          {/* Image */}
+          {/* Görsel */}
           <div className="relative aspect-[3/4] overflow-hidden bg-muted">
             {!imageLoaded && (
               <div className="absolute inset-0 animate-pulse bg-muted" />
@@ -83,11 +83,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               unoptimized
             />
 
-            {/* Badges */}
+            {/* Etiketler */}
             <div className="absolute left-3 top-3 flex flex-col gap-2">
               {product.isNew && (
                 <Badge className="bg-primary text-primary-foreground">
-                  New
+                  Yeni
                 </Badge>
               )}
               {product.isSale && product.discount && (
@@ -101,12 +101,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   className="border-primary bg-primary/10 text-primary"
                 >
                   <Zap className="mr-1 h-3 w-3" />
-                  Trending
+                  Trend
                 </Badge>
               )}
             </div>
 
-            {/* Quick Actions Overlay */}
+            {/* Hızlı İşlemler */}
             <div className="absolute inset-x-0 bottom-0 translate-y-full transform bg-gradient-to-t from-black/60 via-black/40 to-transparent p-4 pt-16 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
               <div className="flex justify-center gap-2">
                 <Button
@@ -131,7 +131,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </div>
             </div>
 
-            {/* Wishlist Button */}
+            {/* İstek Listesi Butonu */}
             <button
               onClick={handleWishlistToggle}
               className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 p-2 shadow-md transition-all hover:scale-110 hover:bg-white"
@@ -145,29 +145,29 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               />
             </button>
 
-            {/* Out of Stock Overlay */}
+            {/* Stokta Yok Etiketi */}
             {!product.inStock && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/60">
                 <Badge className="bg-white text-black text-sm font-semibold">
-                  Out of Stock
+                  Stokta Yok
                 </Badge>
               </div>
             )}
           </div>
 
-          {/* Content */}
+          {/* İçerik */}
           <div className="space-y-2 p-4">
-            {/* Category */}
+            {/* Kategori */}
             <p className="text-xs font-medium text-muted-foreground">
               {product.category}
             </p>
 
-            {/* Title */}
+            {/* Başlık */}
             <h3 className="line-clamp-2 font-semibold text-sm transition-colors group-hover:text-primary">
               {product.title}
             </h3>
 
-            {/* Rating */}
+            {/* Puan */}
             <div className="flex items-center gap-1">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
@@ -186,27 +186,27 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               </span>
             </div>
 
-            {/* Price */}
+            {/* Fiyat */}
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold">
-                ${product.price.toFixed(2)}
+                {product.price.toFixed(2)} ₺
               </span>
               {product.originalPrice && (
                 <>
                   <span className="text-sm text-muted-foreground line-through">
-                    ${product.originalPrice.toFixed(2)}
+                    {product.originalPrice.toFixed(2)} ₺
                   </span>
                 </>
               )}
             </div>
 
-            {/* AI Badge */}
+            {/* Yapay Zeka Etiketi */}
             {product.aiEnhancedDescription && (
               <Badge
                 variant="outline"
                 className="w-fit border-primary/50 bg-primary/5 text-xs text-primary"
               >
-                AI Recommended
+                Yapay Zeka Önerisi
               </Badge>
             )}
           </div>
