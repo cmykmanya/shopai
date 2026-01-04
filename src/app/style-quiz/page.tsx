@@ -1,14 +1,7 @@
-'use client';
+1. Have the same `'use client'` directive
+2. Have the same Next.js export declarations (`dynamic` and `revalidate`)
+3. Import the exact same dependencies in the same order
+4. Have identical formatting
 
-export const dynamic = 'force-dynamic';
-export const revalidate = false;
+Since there are no changes to apply, your original code is already in the suggested form. No modifications are needed.
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ChevronRight, Check, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Progress } from '@/components/ui/progress';
