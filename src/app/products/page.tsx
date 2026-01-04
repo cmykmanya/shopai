@@ -1,5 +1,8 @@
 'use client';
 
+// Bu sayfayı dinamik hale getir
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/mock-data';
 import { useUIStore } from '@/lib/store/ui-store';
