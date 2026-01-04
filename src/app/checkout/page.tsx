@@ -6,7 +6,7 @@ import { useUserStore } from '@/lib/store/user-store';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Package, ShoppingBag, Truck, Confetti as Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Package, ShoppingBag, Truck, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
