@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -33,7 +33,6 @@ import {
   Star,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NextSeo } from 'next-seo';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -181,9 +180,9 @@ function ProductsContent() {
 
   const FilterPanel = () => (
     <div className="space-y-6">
-      {/* Kategoriler */}
+      {/* Categories */}
       <div>
-        <h3 className="font-semibold mb-3">Kategoriler</h3>
+        <h3 className="font-semibold mb-3">Categories</h3>
         <div className="space-y-2">
           {categories.map((cat) => (
             <div key={cat.id} className="flex items-center space-x-2">
@@ -208,9 +207,9 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Fiyat Aralığı */}
+      {/* Price Range */}
       <div>
-        <h3 className="font-semibold mb-3">Fiyat Aralığı</h3>
+        <h3 className="font-semibold mb-3">Price Range</h3>
         <div className="space-y-3">
           <Slider
             value={priceRange}
@@ -219,15 +218,15 @@ function ProductsContent() {
             step={10}
           />
           <div className="flex items-center justify-between text-sm">
-            <span>{priceRange[0]} ₺</span>
-            <span>{priceRange[1]} ₺</span>
+            <span>${priceRange[0]}</span>
+            <span>${priceRange[1]}</span>
           </div>
         </div>
       </div>
 
-      {/* Markalar */}
+      {/* Brands */}
       <div>
-        <h3 className="font-semibold mb-3">Markalar</h3>
+        <h3 className="font-semibold mb-3">Brands</h3>
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {uniqueBrands.map((brand) => (
             <div key={brand} className="flex items-center space-x-2">
@@ -250,9 +249,9 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Bedenler */}
+      {/* Sizes */}
       <div>
-        <h3 className="font-semibold mb-3">Bedenler</h3>
+        <h3 className="font-semibold mb-3">Sizes</h3>
         <div className="flex flex-wrap gap-2">
           {uniqueSizes.map((size) => (
             <Button
@@ -273,9 +272,9 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Değerlendirme */}
+      {/* Rating */}
       <div>
-        <h3 className="font-semibold mb-3">Minimum Değerlendirme</h3>
+        <h3 className="font-semibold mb-3">Minimum Rating</h3>
         <div className="space-y-2">
           {[4, 3, 2, 1].map((rating) => (
             <div
@@ -295,15 +294,15 @@ function ProductsContent() {
                   />
                 ))}
               </div>
-              <span className="text-sm text-muted-foreground">& Üzeri</span>
+              <span className="text-sm text-muted-foreground">& Up</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Stok Durumu */}
+      {/* Availability */}
       <div>
-        <h3 className="font-semibold mb-3">Stok Durumu</h3>
+        <h3 className="font-semibold mb-3">Availability</h3>
         <div className="flex items-center space-x-2">
           <Checkbox
             id="stock"
@@ -311,19 +310,19 @@ function ProductsContent() {
             onCheckedChange={(checked) => setInStockOnly(checked as boolean)}
           />
           <Label htmlFor="stock" className="text-sm">
-            Sadece Stokta Olanlar
+            In Stock Only
           </Label>
         </div>
       </div>
 
-      {/* Filtreleri Temizle */}
+      {/* Clear Filters */}
       {activeFilterCount > 0 && (
         <Button
           variant="outline"
           className="w-full"
           onClick={clearFilters}
         >
-          Tüm Filtreleri Temizle
+          Clear All Filters
         </Button>
       )}
     </div>
@@ -331,35 +330,13 @@ function ProductsContent() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <NextSeo
-        title={categoryParam ? `${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)} - ShopAI` : "Tüm Ürünler - ShopAI"}
-        description={categoryParam ? `${categoryParam} kategorisindeki en yeni ve trend ürünleri keşfedin.` : "ShopAI'de en yeni ve trend ürünleri keşfedin. Moda, aksesuar ve daha fazlası için kişiselleştirilmiş alışveriş deneyimi."}
-        canonical={`https://shopai.com.tr/urunler${categoryParam ? `?kategori=${categoryParam}` : ''}`}
-        openGraph={
-          {
-            url: `https://shopai.com.tr/urunler${categoryParam ? `?kategori=${categoryParam}` : ''}`,
-            title: categoryParam ? `${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)} - ShopAI` : "Tüm Ürünler - ShopAI",
-            description: categoryParam ? `${categoryParam} kategorisindeki en yeni ve trend ürünleri keşfedin.` : "ShopAI'de en yeni ve trend ürünleri keşfedin. Moda, aksesuar ve daha fazlası için kişiselleştirilmiş alışveriş deneyimi.",
-            images: [
-              {
-                url: "https://shopai.com.tr/og-image.jpg",
-                width: 1200,
-                height: 630,
-                alt: "ShopAI Ürünler",
-              },
-            ],
-            site_name: "ShopAI",
-          }
-        }
-      />
-
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          {categoryParam ? categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1) : 'Tüm Ürünler'}
+          {categoryParam ? categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1) : 'All Products'}
         </h1>
         <p className="text-muted-foreground">
-          {filteredProducts.length} ürün bulundu
+          {filteredProducts.length} products found
         </p>
       </div>
 
@@ -379,7 +356,7 @@ function ProductsContent() {
               className="lg:hidden fixed bottom-4 left-4 z-40 rounded-full shadow-lg"
             >
               <SlidersHorizontal className="mr-2 h-4 w-4" />
-              Filtreler
+              Filters
               {activeFilterCount > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {activeFilterCount}
@@ -389,7 +366,7 @@ function ProductsContent() {
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] overflow-y-auto">
             <SheetHeader>
-              <SheetTitle>Filtreler</SheetTitle>
+              <SheetTitle>Filters</SheetTitle>
             </SheetHeader>
             <div className="mt-6">
               <FilterPanel />
@@ -404,18 +381,156 @@ function ProductsContent() {
             <div className="flex items-center gap-2">
               <Select value={sortValue} onValueChange={setSortValue}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sırala" />
+                  <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="relevance">İlgililik</SelectItem>
-                  <SelectItem value="price-low">Fiyat: Düşükten Yükseğe</SelectItem>
-                  <SelectItem value="price-high">Fiyat: Yüksekten Düşüğe</SelectItem>
-                  <SelectItem value="newest">En Yeniler</SelectItem>
-                  <SelectItem value="bestselling">Çok Satanlar</SelectItem>
+                  <SelectItem value="relevance">Relevance</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="bestselling">Best Selling</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-center gap-2">
               <Button
-                variant={viewMode === 'grid' ? 'default' :
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setViewMode('grid')}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Active Filters */}
+          {activeFilterCount > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {selectedCategories.map((cat) => (
+                <Badge key={cat} variant="secondary" className="gap-1">
+                  {cat}
+                  <button
+                    onClick={() =>
+                      setSelectedCategories(selectedCategories.filter((c) => c !== cat))
+                    }
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              {selectedBrands.map((brand) => (
+                <Badge key={brand} variant="secondary" className="gap-1">
+                  {brand}
+                  <button
+                    onClick={() =>
+                      setSelectedBrands(selectedBrands.filter((b) => b !== brand))
+                    }
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+              <Button variant="ghost" size="sm" onClick={clearFilters}>
+                Clear all
+              </Button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="aspect-[3/4] bg-muted animate-pulse rounded-lg"
+                />
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Products Grid/List */}
+              {currentProducts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-xl font-semibold mb-2">No products found</p>
+                  <p className="text-muted-foreground mb-4">
+                    Try adjusting your filters
+                  </p>
+                  <Button onClick={clearFilters}>Clear Filters</Button>
+                </div>
+              ) : (
+                <motion.div
+                  layout
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'
+                      : 'space-y-4'
+                  }
+                >
+                  <AnimatePresence>
+                    {currentProducts.map((product, index) => (
+                      <ProductCard key={product.id} product={product} index={index} />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronDown className="h-4 w-4 -rotate-90" />
+                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? 'default' : 'outline'}
+                          size="icon"
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      )
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronDown className="h-4 w-4 rotate-90" />
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}>
+      <ProductsContent />
+    </Suspense>
+  );
+}

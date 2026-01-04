@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -15,7 +15,7 @@ export default function CheckoutSuccessPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        {/* Başarı Mesajı */}
+        {/* Success Message */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -29,14 +29,14 @@ export default function CheckoutSuccessPage() {
           >
             <CheckCircle2 className="h-20 w-20 text-green-500" />
           </motion.div>
-          
-          <h1 className="text-4xl font-bold mb-4">Siparişiniz Onaylandı!</h1>
+
+          <h1 className="text-4xl font-bold mb-4">Order Confirmed!</h1>
           <p className="text-xl text-muted-foreground">
-            Satın alma işleminiz için teşekkür ederiz. Size bir onay e-postası gönderdik.
+            Thank you for your purchase. We've sent a confirmation email.
           </p>
         </motion.div>
-        
-        {/* Sipariş Detayları Kartı */}
+
+        {/* Order Details Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,20 +44,20 @@ export default function CheckoutSuccessPage() {
           className="border rounded-lg p-6 mb-8"
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Sipariş Detayları</h2>
-            <Badge variant="secondary">İşleniyor</Badge>
+            <h2 className="text-lg font-semibold">Order Details</h2>
+            <Badge variant="secondary">Processing</Badge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Sipariş Numarası</p>
-              <p className="font-semibold">SIP-{Date.now()}</p>
+              <p className="text-sm text-muted-foreground mb-1">Order Number</p>
+              <p className="font-semibold">ORD-{Date.now()}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Tahmini Teslimat</p>
+              <p className="text-sm text-muted-foreground mb-1">Estimated Delivery</p>
               <p className="font-semibold">
                 {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(
-                  'tr-TR',
+                  'en-US',
                   {
                     weekday: 'long',
                     month: 'long',
@@ -67,33 +67,33 @@ export default function CheckoutSuccessPage() {
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Teslimat Adresi</p>
+              <p className="text-sm text-muted-foreground mb-1">Shipping Address</p>
               <p className="font-semibold">John Doe</p>
               <p className="text-sm">123 Main Street</p>
               <p className="text-sm">New York, NY 10001</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Ödeme Yöntemi</p>
-              <p className="font-semibold">Visa (Son 4 hanesi: 4242)</p>
+              <p className="text-sm text-muted-foreground mb-1">Payment Method</p>
+              <p className="font-semibold">Visa ending in 4242</p>
             </div>
           </div>
         </motion.div>
-        
-        {/* Önerilen Ürünler */}
+
+        {/* Recommended Products */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <h2 className="text-2xl font-bold mb-6">Bunları da Beğenebilirsiniz</h2>
+          <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
             {products.slice(10, 14).map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}
           </div>
         </motion.div>
-        
-        {/* Butonlar */}
+
+        {/* Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -102,11 +102,11 @@ export default function CheckoutSuccessPage() {
         >
           <Button size="lg" variant="outline" onClick={() => router.push('/account')}>
             <Package className="mr-2 h-5 w-5" />
-            Siparişi Görüntüle
+            View Order
           </Button>
           <Button size="lg" asChild>
             <Link href="/products">
-              Alışverişe Devam Et
+              Continue Shopping
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
