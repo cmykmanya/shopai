@@ -1,0 +1,3 @@
+Bu dosya, GitHub Desktop'ta değişikliklerin görünüp görünmediğini test etmek için oluşturulmuştur.
+
+Eğer bu dosya GitHub Desktop'ta görünüyorsa, sorun çözülmüştür!
