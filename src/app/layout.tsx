@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
+  try {
   const seoSettings = await db.sEOSettings.findFirst();
 
   return {
@@ -40,6 +41,30 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [seoSettings?.twitterCard || '/twitter-card.jpg'],
   },
 };
+  } catch (error) {
+    console.error("SEO settings could not be fetched:", error);
+    return {
+      title: "ShopAI - AI-Powered E-Commerce Platform",
+      description: "Discover your perfect style with AI-powered recommendations. Shop the latest trends in fashion, accessories, and more.",
+      keywords: ["ShopAI", "AI", "e-commerce", "fashion", "shopping", "style quiz", "personalized recommendations"],
+      authors: [{ name: "ShopAI Team" }],
+      icons: {
+        icon: "/logo.svg",
+      },
+      openGraph: {
+        title: "ShopAI - AI-Powered E-Commerce",
+        description: "Discover your perfect style with AI-powered recommendations",
+        type: "website",
+        images: ['/og-image.jpg'],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "ShopAI - AI-Powered E-Commerce",
+        description: "Discover your perfect style with AI-powered recommendations",
+        images: ['/twitter-card.jpg'],
+      },
+    };
+}
 }
 
 export default function RootLayout({

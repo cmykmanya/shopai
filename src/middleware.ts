@@ -1,27 +1,18 @@
-import NextAuth from "next-auth";
-import authConfig from "./auth.config";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const { auth } = NextAuth(authConfig);
-const adminRoutes = [
-  "/admin",
-  "/admin/products",
-  "/admin/orders",
-  "/admin/users",
-  "/admin/settings",
-];
+export function middleware(req: NextRequest) {
+  const sessionToken =
+    req.cookies.get("next-auth.session-token") ||
+    req.cookies.get("__Secure-next-auth.session-token");
 
-export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const isAdminRoute = adminRoutes.some((route) => nextUrl.pathname.startsWith(route));
-  const isAdmin = req.auth?.user?.role === "ADMIN";
-
-  if (isAdminRoute && (!isLoggedIn || !isAdmin)) {
-    return NextResponse.redirect(new URL("/admin/login", nextUrl));
+  if (!sessionToken && req.nextUrl.pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/admin/:path*"],
 };
