@@ -146,11 +146,41 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Banner Module */}
-      <section className="py-12 bg-background">
-        <div className="container mx-auto px-4">
-          <BannerModule />
-        </div>
+      {/* Banner Modülü */}
+      <section className="w-full">
+        <BannerModule
+          banners={[
+            {
+              id: 'banner-1',
+              title: 'Yaz Kolleksiyonu',
+              subtitle: 'Yeni sezon trendleri',
+              imageUrl: '/banner1.jpg',
+              ctaText: 'Keşfet',
+              ctaUrl: '/products',
+              category: 'Yaz',
+              priority: 1,
+              isActive: true,
+              createdAt: new Date(),
+            },
+            {
+              id: 'banner-2',
+              title: 'İndirimler Başladı',
+              subtitle: 'Tüm ürünlerde %50 indirim',
+              imageUrl: '/banner1.jpg',
+              ctaText: 'Satın Al',
+              ctaUrl: '/products?sale=true',
+              category: 'İndirim',
+              priority: 2,
+              isActive: true,
+              createdAt: new Date(),
+            },
+          ]}
+          autoPlay={true}
+          autoPlayInterval={6000}
+          showControls={true}
+          showIndicators={true}
+          height="lg"
+        />
       </section>
 
       {/* Featured Categories */}

@@ -241,7 +241,7 @@ export default function ProductsPage({ searchParams }: ProductsPageProps) {
               <SelectValue placeholder="Kategori seçin" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tüm Kategoriler</SelectItem>
+              <SelectItem value="all">Tüm Kategoriler</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.slug}>
                   {category.name}
@@ -349,7 +349,6 @@ export default function ProductsPage({ searchParams }: ProductsPageProps) {
                 key={product.id}
                 product={product}
                 index={index}
-                horizontal={viewMode === 'list'}
               />
             ))}
           </div>

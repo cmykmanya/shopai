@@ -285,7 +285,7 @@ export default function ProductDetailPage() {
                   className="flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium"
                 >
                   <Sparkles className="h-4 w-4" />
-                  {showAiDescription ? 'Hide' : 'Show'} AI Enhanced Description
+                  {showAiDescription ? 'Gizle' : 'Göster'} AI ile Geliştirilmiş Açıklama
                 </button>
 
                 <AnimatePresence>
@@ -426,7 +426,7 @@ export default function ProductDetailPage() {
                 ) : (
                   <>
                     <ShoppingBag className="mr-2 h-5 w-5" />
-                    Add to Cart
+                    Sepete Ekle
                   </>
                 )}
               </Button>
@@ -459,7 +459,7 @@ export default function ProductDetailPage() {
                 router.push('/checkout');
               }}
             >
-              Buy Now
+              Hemen Satın Al
             </Button>
           </div>
 
@@ -467,24 +467,24 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Truck className="h-4 w-4" />
-              <span>Free shipping over $50</span>
+              <span>50 TL üzeri ücretsiz kargo</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <ShieldCheck className="h-4 w-4" />
-              <span>Secure payment</span>
+              <span>Güvenli ödeme</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <RotateCcw className="h-4 w-4" />
-              <span>30-day returns</span>
+              <span>30 gün iade</span>
             </div>
           </div>
 
           {/* Tabs */}
           <Tabs defaultValue="description" className="mt-8">
             <TabsList>
-              <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-              <TabsTrigger value="shipping">Shipping</TabsTrigger>
+              <TabsTrigger value="description">Açıklama</TabsTrigger>
+              <TabsTrigger value="reviews">Yorumlar</TabsTrigger>
+              <TabsTrigger value="shipping">Kargo</TabsTrigger>
             </TabsList>
 
             <TabsContent value="description" className="mt-4">

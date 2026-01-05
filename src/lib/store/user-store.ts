@@ -129,7 +129,14 @@ export const useUserStore = create<UserState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         orders: state.orders
-      })
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Listen to NextAuth session changes
+        if (state?.isAuthenticated) {
+          // User is authenticated, keep current state
+          return;
+        }
+      }
     }
   )
 );

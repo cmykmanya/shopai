@@ -1,208 +1,253 @@
 'use client';
 
-import { useState } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from './ui/button';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
-export default function MegaCategoryMenu() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  subcategories: Subcategory[];
+}
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+interface Subcategory {
+  id: string;
+  name: string;
+  slug: string;
+  categoryId: string;
+  description?: string;
+  featured?: boolean;
+  productsCount?: number;
+}
+
+interface MegaCategoryMenuProps {
+  categories: Category[];
+}
+
+export function MegaCategoryMenu({ categories }: MegaCategoryMenuProps) {
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+  const [openSubcategory, setOpenSubcategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpenSubcategory(null);
+        setOpenCategory(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
+  const handleCategoryClick = (categoryId: string) => {
+    if (openCategory === categoryId) {
+      setOpenCategory(null);
+      setOpenSubcategory(null);
+    } else {
+      setOpenCategory(categoryId);
+      setOpenSubcategory(null);
+    }
+  };
+
+  const handleSubcategoryClick = (subcategoryId: string) => {
+    if (openSubcategory === subcategoryId) {
+      setOpenSubcategory(null);
+    } else {
+      setOpenSubcategory(subcategoryId);
+    }
+  };
 
   return (
     <div className="relative">
-      {/* Desktop Menu */}
-      <div className="hidden lg:flex items-center space-x-2">
-        {megaCategories.map((category) => (
-          <div
+      {/* Main Category Buttons */}
+      <div className="flex items-center space-x-2">
+        {categories.map((category) => (
+          <Button
             key={category.id}
-            className="relative group"
-            onMouseEnter={() => setActiveCategory(category.id)}
-            onMouseLeave={() => setActiveCategory(null)}
+            variant="ghost"
+            className={`group relative h-12 px-4 text-sm font-medium transition-colors ${
+              openCategory === category.id
+                ? 'text-primary bg-muted'
+                : 'text-foreground hover:text-primary'
+            }`}
+            onClick={() => handleCategoryClick(category.id)}
           >
-            <Button
-              variant="ghost"
-              className="flex items-center gap-1 text-sm font-medium hover:text-primary transition-colors"
-            >
-              {category.name}
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-
-            {/* Mega Menu Dropdown */}
-            <div
-              className={`absolute top-full left-0 w-screen max-w-6xl bg-white shadow-lg border border-gray-200 rounded-lg py-6 px-8 transition-all duration-300 ease-in-out transform ${
-                activeCategory === category.id
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 -translate-y-2 pointer-events-none'
+            {category.name}
+            <ChevronDown
+              className={`ml-1 h-4 w-4 transition-transform ${
+                openCategory === category.id ? 'rotate-180' : ''
               }`}
-              style={{
-                marginLeft: '-50vw',
-                marginRight: '-50vw',
-                maxWidth: '100vw',
-              }}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {category.subcategories.map((subcategory) => (
-                  <div key={subcategory.id} className="group/sub">
-                    <Link
-                      href={`/products?category=${subcategory.slug}`}
-                      className="block p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                      onClick={closeMenu}
-                    >
-                      <h3 className="font-semibold text-gray-900 mb-2 group-hover/sub:text-primary transition-colors">
-                        {subcategory.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Trend {subcategory.name} koleksiyonu
-                      </p>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            />
+            
+            {/* Dropdown Indicator */}
+            {openCategory === category.id && (
+              <motion.div
+                layoutId="mega-menu-bg"
+                className="absolute inset-0 rounded-md bg-muted"
+                initial={false}
+                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              />
+            )}
+          </Button>
         ))}
       </div>
 
-      {/* Mobile Menu */}
-      <div className="lg:hidden">
-        <Button
-          variant="ghost"
-          onClick={toggleMenu}
-          className="flex items-center gap-2"
-        >
-          <Menu className="h-5 w-5" />
-          Kategoriler
-        </Button>
-
-        {/* Mobile Dropdown */}
-        {isOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden">
-            <div className="fixed inset-y-0 left-0 w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-lg font-semibold">Kategoriler</h2>
-                <Button variant="ghost" onClick={closeMenu}>
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              <div className="overflow-y-auto h-[calc(100%-64px)]">
-                {megaCategories.map((category) => (
-                  <div key={category.id} className="border-b">
-                    <button
-                      className="w-full text-left p-4 flex items-center justify-between font-medium hover:bg-gray-50"
-                      onClick={() => setActiveCategory(
-                        activeCategory === category.id ? null : category.id
-                      )}
-                    >
-                      <span>{category.name}</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${
-                        activeCategory === category.id ? 'rotate-180' : ''
-                      }`} />
-                    </button>
-
-                    {activeCategory === category.id && (
-                      <div className="bg-gray-50 py-2 pl-6">
-                        {category.subcategories.map((subcategory) => (
-                          <Link
-                            key={subcategory.id}
-                            href={`/products?category=${subcategory.slug}`}
-                            className="block py-2 text-sm text-gray-700 hover:text-primary"
-                            onClick={closeMenu}
-                          >
-                            {subcategory.name}
-                          </Link>
-                        ))}
+      {/* Mega Menu */}
+      <AnimatePresence>
+        {openCategory && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-0 top-full z-50 w-screen max-w-7xl rounded-lg border bg-background shadow-lg"
+            style={{ marginTop: '-1px' }}
+          >
+            <div className="grid grid-cols-4 gap-8 p-8">
+              {/* Category Info */}
+              {(() => {
+                const category = categories.find(c => c.id === openCategory);
+                return (
+                  <div className="col-span-1 space-y-4">
+                    {category?.image && (
+                      <div className="aspect-square overflow-hidden rounded-lg">
+                        <img
+                          src={category.image}
+                          alt={category.name}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
                     )}
+                    <div>
+                      <h3 className="text-lg font-semibold">{category?.name}</h3>
+                      {category?.description && (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {category.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                ))}
+                );
+              })()}
+
+              {/* Subcategories */}
+              <div className="col-span-3 grid grid-cols-2 gap-6">
+                {(() => {
+                  const category = categories.find(c => c.id === openCategory);
+                  if (!category) return null;
+
+                  // Group subcategories by featured status
+                  const featured = category.subcategories.filter(s => s.featured);
+                  const regular = category.subcategories.filter(s => !s.featured);
+
+                  return (
+                    <>
+                      {featured.length > 0 && (
+                        <div className="space-y-4">
+                          <h4 className="font-medium text-primary">Öne Çıkanlar</h4>
+                          {featured.map((subcategory) => (
+                            <SubcategoryItem
+                              key={subcategory.id}
+                              subcategory={subcategory}
+                              isOpen={openSubcategory === subcategory.id}
+                              onToggle={() => handleSubcategoryClick(subcategory.id)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="space-y-4">
+                        <h4 className="font-medium">Tüm Kategoriler</h4>
+                        <ScrollArea className="h-64 pr-4">
+                          {regular.map((subcategory) => (
+                            <SubcategoryItem
+                              key={subcategory.id}
+                              subcategory={subcategory}
+                              isOpen={openSubcategory === subcategory.id}
+                              onToggle={() => handleSubcategoryClick(subcategory.id)}
+                            />
+                          ))}
+                        </ScrollArea>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }
 
-// Mock data for mega categories
-const megaCategories = [
-  {
-    id: 'men',
-    name: 'Erkek',
-    slug: 'men',
-    image: '/api/placeholder/400/300',
-    subcategories: [
-      { id: 'men-tshirts', name: 'T-Shirt', slug: 'tshirts', categoryId: 'men', isActive: true },
-      { id: 'men-shirts', name: 'Gömlek', slug: 'shirts', categoryId: 'men', isActive: true },
-      { id: 'men-pants', name: 'Pantolon', slug: 'pants', categoryId: 'men', isActive: true },
-      { id: 'men-jackets', name: 'Ceket', slug: 'jackets', categoryId: 'men', isActive: true },
-      { id: 'men-shoes', name: 'Ayakkabı', slug: 'shoes', categoryId: 'men', isActive: true },
-      { id: 'men-accessories', name: 'Aksesuar', slug: 'accessories', categoryId: 'men', isActive: true },
-    ],
-    isActive: true,
-  },
-  {
-    id: 'women',
-    name: 'Kadın',
-    slug: 'women',
-    image: '/api/placeholder/400/300',
-    subcategories: [
-      { id: 'women-tops', name: 'Üst', slug: 'tops', categoryId: 'women', isActive: true },
-      { id: 'women-dresses', name: 'Elbise', slug: 'dresses', categoryId: 'women', isActive: true },
-      { id: 'women-pants', name: 'Pantolon', slug: 'pants', categoryId: 'women', isActive: true },
-      { id: 'women-skirts', name: 'Etek', slug: 'skirts', categoryId: 'women', isActive: true },
-      { id: 'women-jackets', name: 'Ceket', slug: 'jackets', categoryId: 'women', isActive: true },
-      { id: 'women-shoes', name: 'Ayakkabı', slug: 'shoes', categoryId: 'women', isActive: true },
-      { id: 'women-bags', name: 'Çanta', slug: 'bags', categoryId: 'women', isActive: true },
-    ],
-    isActive: true,
-  },
-  {
-    id: 'kids',
-    name: 'Çocuk',
-    slug: 'kids',
-    image: '/api/placeholder/400/300',
-    subcategories: [
-      { id: 'kids-boys', name: 'Erkek Çocuk', slug: 'boys', categoryId: 'kids', isActive: true },
-      { id: 'kids-girls', name: 'Kız Çocuk', slug: 'girls', categoryId: 'kids', isActive: true },
-      { id: 'kids-baby', name: 'Bebek', slug: 'baby', categoryId: 'kids', isActive: true },
-      { id: 'kids-shoes', name: 'Ayakkabı', slug: 'shoes', categoryId: 'kids', isActive: true },
-      { id: 'kids-accessories', name: 'Aksesuar', slug: 'accessories', categoryId: 'kids', isActive: true },
-    ],
-    isActive: true,
-  },
-  {
-    id: 'accessories',
-    name: 'Aksesuar',
-    slug: 'accessories',
-    image: '/api/placeholder/400/300',
-    subcategories: [
-      { id: 'acc-bags', name: 'Çantalar', slug: 'bags', categoryId: 'accessories', isActive: true },
-      { id: 'acc-jewelry', name: 'Takı', slug: 'jewelry', categoryId: 'accessories', isActive: true },
-      { id: 'acc-watches', name: 'Saatler', slug: 'watches', categoryId: 'accessories', isActive: true },
-      { id: 'acc-sunglasses', name: 'Gözlük', slug: 'sunglasses', categoryId: 'accessories', isActive: true },
-      { id: 'acc-hats', name: 'Şapkalar', slug: 'hats', categoryId: 'accessories', isActive: true },
-      { id: 'acc-belts', name: 'Kemerler', slug: 'belts', categoryId: 'accessories', isActive: true },
-    ],
-    isActive: true,
-  },
-  {
-    id: 'shoes',
-    name: 'Ayakkabı',
-    slug: 'shoes',
-    image: '/api/placeholder/400/300',
-    subcategories: [
-      { id: 'shoes-sneakers', name: 'Spor Ayakkabı', slug: 'sneakers', categoryId: 'shoes', isActive: true },
-      { id: 'shoes-boots', name: 'Çizmeler', slug: 'boots', categoryId: 'shoes', isActive: true },
-      { id: 'shoes-sandals', name: 'Terlik', slug: 'sandals', categoryId: 'shoes', isActive: true },
-      { id: 'shoes-formal', name: 'Resmi Ayakkabı', slug: 'formal', categoryId: 'shoes', isActive: true },
-      { id: 'shoes-sports', name: 'Spor Ayakkabı', slug: 'sports', categoryId: 'shoes', isActive: true },
-    ],
-    isActive: true,
-  },
-];
+function SubcategoryItem({
+  subcategory,
+  isOpen,
+  onToggle,
+}: {
+  subcategory: Subcategory;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Button
+        variant="ghost"
+        className="w-full justify-between text-left font-normal hover:bg-transparent"
+        onClick={onToggle}
+      >
+        <span className="flex items-center gap-2">
+          {subcategory.name}
+          {subcategory.productsCount && (
+            <Badge variant="secondary" className="ml-2">
+              {subcategory.productsCount}
+            </Badge>
+          )}
+        </span>
+        <ChevronRight
+          className={`h-4 w-4 transition-transform ${
+            isOpen ? 'rotate-90' : ''
+          }`}
+        />
+      </Button>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="ml-4 space-y-2 border-l-2 border-border pl-4"
+          >
+            {subcategory.description && (
+              <p className="text-sm text-muted-foreground">
+                {subcategory.description}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <a href={`/products?category=${subcategory.slug}`}>
+                  Ürünleri Gör
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <a href={`/products?category=${subcategory.slug}&sort=featured`}>
+                  Öne Çıkanlar
+                </a>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

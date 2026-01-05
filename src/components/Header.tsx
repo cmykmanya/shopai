@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MegaCategoryMenu } from '@/components/MegaCategoryMenu';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +27,10 @@ export function Header() {
   const pathname = usePathname();
   const itemCount = useCartStore((state) => state.itemCount);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
+  
+  // Import categories data
+  const { mockCategories } = require('@/data/categories');
+  const categories = mockCategories;
   const { openCart, isMenuOpen, toggleMenu, isSearchOpen, toggleSearch } =
     useUIStore();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -95,6 +100,11 @@ export function Header() {
               <ShoppingBag className="h-8 w-8 text-primary" />
               <span className="text-2xl font-bold">ShopAI</span>
             </Link>
+
+            {/* Masaüstü için Mega Category Menu */}
+            <div className="hidden lg:flex">
+              <MegaCategoryMenu categories={categories} />
+            </div>
 
             {/* Masaüstü Navigasyon */}
             <nav className="hidden lg:flex items-center space-x-8">

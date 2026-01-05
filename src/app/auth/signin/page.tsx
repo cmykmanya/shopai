@@ -19,16 +19,21 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
+      console.log('Giriş denemesi:', { email, password });
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
 
+      console.log('Giriş sonucu:', result);
+
       if (result?.error) {
+        console.error('Giriş hatası:', result.error);
         alert('Giriş başarısız: ' + result.error);
       } else {
-        router.push('/admin');
+        console.log('Giriş başarılı, yönlendiriliyor...');
+        router.push('/');
       }
     } catch (error) {
       console.error('Giriş hatası:', error);
