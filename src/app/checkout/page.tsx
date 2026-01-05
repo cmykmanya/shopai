@@ -1,372 +1,540 @@
 'use client';
 
-import { useState } from 'react';
-import { useCartStore } from '@/lib/store/cart-store';
-import { useUserStore } from '@/lib/store/user-store';
-import { useUIStore } from '@/lib/store/ui-store';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Package, ShoppingBag, Truck, Sparkles } from 'lucide-react';
+import { 
+  ShoppingCart, 
+  Plus, 
+  Minus, 
+  Trash2, 
+  CheckCircle, 
+  CreditCard, 
+  Truck, 
+  Gift,
+  ArrowLeft
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import Image from 'next/image';
+import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCartStore } from '@/lib/store/cart-store';
+import { useUIStore } from '@/lib/store/ui-store';
+import { useToast } from '@/hooks/use-toast';
 
-// Türkçe çeviriler
-type CheckoutStep = 'kargo' | 'odeme' | 'inceleme';
-
-interface KargoFormuVerisi {
-  email: string;
-  tamAd: string;
-  telefon: string;
-  adres: string;
-  sehir: string;
-  ilce: string;
-  postaKodu: string;
-  ulke: string;
-  adresKaydet: boolean;
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
+  variant: {
+    size: string;
+    color: string;
+  };
 }
 
-interface OdemeFormuVerisi {
-  yontem: 'kart' | 'paypal' | 'applepay';
-  kartNumarasi: string;
-  sonKullanma: string;
-  cvv: string;
-  kartUzerindekiIsim: string;
-  kargoAdresiyleAyni: boolean;
+interface CheckoutFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  paymentMethod: 'card' | 'paypal' | 'applepay';
+  shippingMethod: 'standard' | 'express';
+  promoCode?: string;
+  giftMessage?: string;
+}
+
+interface CartItem {
+  id: string;
+  productId: string;
+  productTitle: string;
+  image: string;
+  price: number;
+  quantity: number;
+  variant: {
+    size: string;
+    color: string;
+    colorHex: string;
+  };
 }
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, clearCart } = useCartStore();
-  const { user, addOrder } = useUserStore();
-  const showToast = useUIStore((state) => state.showToast);
-
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('kargo');
-  const [loading, setLoading] = useState(false);
-  const [siparisTamamlandi, setSiparisTamamlandi] = useState(false);
-
-  const [kargoVerisi, setKargoVerisi] = useState<KargoFormuVerisi>({
-    email: user?.email || '',
-    tamAd: user?.name || '',
-    telefon: '',
-    adres: '',
-    sehir: '',
-    ilce: '',
-    postaKodu: '',
-    ulke: 'Türkiye',
-    adresKaydet: false,
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const openQuickView = useUIStore((state) => state.openQuickView);
+  
+  const { items, clearCart, removeItem, updateQuantity } = useCartStore();
+  
+  const [formData, setFormData] = useState<CheckoutFormData>({
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'Turkey',
+    paymentMethod: 'card',
+    shippingMethod: 'standard'
   });
+  
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
 
-  const [teslimatSecenegi, setTeslimatSecenegi] = useState('standart');
+  // Load cart items and initialize form
+  useEffect(() => {
+    // Initialize form with user data if available
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setFormData(prev => ({
+          ...prev,
+          fullName: userData.name || '',
+          email: userData.email || '',
+          phone: userData.phone || ''
+        }));
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+  }, []);
 
-  const [odemeVerisi, setOdemeVerisi] = useState<OdemeFormuVerisi>({
-    yontem: 'kart',
-    kartNumarasi: '',
-    sonKullanma: '',
-    cvv: '',
-    kartUzerindekiIsim: user?.name || '',
-    kargoAdresiyleAyni: true,
-  });
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shippingCost = formData.shippingMethod === 'express' ? 15 : 5;
+  const discount = promoApplied ? subtotal * 0.1 : 0;
+  const total = subtotal + shippingCost - discount;
 
-  const adimlar = [
-    { id: 'kargo', label: 'Kargo Bilgileri', icon: Truck },
-    { id: 'odeme', label: 'Ödeme', icon: CreditCard },
-    { id: 'inceleme', label: 'İnceleme', icon: Package },
-  ];
-
-  const teslimatSecenekleri = [
-    {
-      id: 'standart',
-      name: 'Standart Kargo',
-      price: 0,
-      days: '5-7 iş günü',
-    },
-    {
-      id: 'express',
-      name: 'Hızlı Kargo',
-      price: 10,
-      days: '2-3 iş günü',
-    },
-    {
-      id: 'aynigun',
-      name: 'Aynı Gün Teslimat',
-      price: 20,
-      days: '1 iş günü',
-    },
-  ];
-
-  const kargoUcreti = teslimatSecenekleri.find((d) => d.id === teslimatSecenegi)?.price || 0;
-  const vergi = subtotal * 0.08;
-  const toplam = subtotal + kargoUcreti + vergi;
-
-  const handleKargoSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentStep('odeme');
+  const handleQuantityChange = (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) {
+      removeItem(itemId);
+    } else {
+      updateQuantity(itemId, newQuantity);
+    }
   };
 
-  const handleOdemeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentStep('inceleme');
+  const handlePromoApply = () => {
+    if (promoCode.toLowerCase() === 'save10') {
+      setPromoApplied(true);
+      toast({
+        title: "Promosyon Uygulandı",
+        description: "10% indirim uygulandı.",
+      });
+    } else {
+      toast({
+        title: "Geçersiz Promosyon",
+        description: "Lütfen geçerli bir promosyon kodu girin.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSiparisiTamamla = async () => {
-    setLoading(true);
-
-    // API çağrısını simüle et
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Sipariş oluştur
-    const yeniSiparis = {
-      id: `SIP-${Date.now()}`,
-      userId: user?.id || `misafir-${Date.now()}`,
-      status: 'İşleniyor' as const,
-      items: items.map((item) => ({
-        productId: item.productId,
-        productTitle: item.productTitle,
-        image: item.image,
-        variant: item.variant,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-      subtotal,
-      indirim: 0,
-      kargo: kargoUcreti,
-      vergi,
-      toplam,
-      kargoAdresi: {
-        id: `adr-${Date.now()}`,
-        tamAd: kargoVerisi.tamAd,
-        sokak: kargoVerisi.adres,
-        sehir: kargoVerisi.sehir,
-        ilce: kargoVerisi.ilce,
-        postaKodu: kargoVerisi.postaKodu,
-        ulke: kargoVerisi.ulke,
-        telefon: kargoVerisi.telefon,
-        varsayilan: false,
-      },
-      odemeYontemi:
-        odemeVerisi.yontem === 'kart'
-          ? 'Kart (Sonu **** ile biten)'
-          : odemeVerisi.yontem === 'paypal'
-          ? 'PayPal'
-          : 'Apple Pay',
-      siparisTarihi: new Date().toISOString(),
-    };
-
-    if (user?.id) {
-      addOrder(yeniSiparis);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (items.length === 0) {
+      toast({
+        title: "Sepet Boş",
+        description: "Lütfen önce sepetinize ürün ekleyin.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    clearCart();
-    setLoading(false);
-    setSiparisTamamlandi(true);
-    showToast('Siparişiniz başarıyla alındı!', 'success');
+    setIsProcessing(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Save order to localStorage
+      const order = {
+        id: `ORD-${Date.now()}`,
+        items,
+        total,
+        shipping: shippingCost,
+        discount,
+        customer: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone
+        },
+        address: {
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: formData.country
+        },
+        paymentMethod: formData.paymentMethod,
+        shippingMethod: formData.shippingMethod,
+        orderDate: new Date().toISOString()
+      };
+
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+      localStorage.setItem('orders', JSON.stringify([order, ...existingOrders]));
+      
+      // Clear cart
+      clearCart();
+      
+      // Show success message
+      toast({
+        title: "Sipariş Alındı",
+        description: "Siparişiniz başarıyla oluşturuldu. Teşekkürler!",
+      });
+
+      // Redirect to order success page
+      router.push('/checkout/success');
+      
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Siparişiniz işlenirken bir hata oluştu.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  if (items.length === 0 && !siparisTamamlandi) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-md mx-auto text-center">
-          <ShoppingBag className="h-24 w-24 text-muted-foreground/50 mx-auto mb-6" />
-          <h1 className="text-2xl font-bold mb-2">Sepetiniz Boş</h1>
-          <p className="text-muted-foreground mb-6">
-            Sepetinizde ürün bulunmuyor. Alışverişe devam etmek için ürünlerimize göz atın.
-          </p>
-          <Button onClick={() => router.push('/products')}>
-            Alışverişe Devam Et
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const handleBackToCart = () => {
+    router.push('/cart');
+  };
 
-  if (siparisTamamlandi) {
+  if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Sparkles className="h-24 w-24 text-yellow-500 mx-auto mb-6" />
-          <h1 className="text-3xl font-bold mb-4">Siparişiniz Alındı!</h1>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Teşekkür ederiz! Siparişiniz başarıyla alındı ve işleniyor. Sipariş detayları e-posta adresinize gönderilecektir.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button onClick={() => router.push('/orders')}>Siparişlerim</Button>
-            <Button variant="outline" onClick={() => router.push('/products')}>Alışverişe Devam Et</Button>
-          </div>
-        </motion.div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Sepetiniz Boş</h2>
+          <p className="text-muted-foreground mb-8">Önce alışveriş yapmalısınız.</p>
+          <Button onClick={() => router.push('/products')}>Alışverişe Başla</Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sol Taraf - Adımlar ve Form */}
-        <div className="lg:w-2/3">
-          {/* Adım Başlıkları */}
-          <div className="flex items-center justify-between mb-8">
-            {adimlar.map((step, index) => (
-              <div key={step.id} className="flex items-center gap-2">
-                <div
-                  className={`flex items-center gap-2 ${index > adimlar.findIndex((s) => s.id === currentStep) ? 'opacity-50' : ''}`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${step.id === currentStep ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
-                  >
-                    <step.icon className="h-4 w-4" />
-                  </div>
-                  <span className="hidden md:inline font-medium">
-                    {step.label}
-                  </span>
-                </div>
-                {index < adimlar.length - 1 && (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-            ))}
+      <div className="max-w-6xl mx-auto">
+        <div className="flex items-center gap-4 mb-8">
+          <Button variant="ghost" onClick={handleBackToCart}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Sepete Geri Dön
+          </Button>
+          <h1 className="text-3xl font-bold">Ödeme</h1>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Order Summary */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sipariş Özeti</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <AnimatePresence mode="wait">
+                  {items.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="flex items-center gap-4 border-b pb-4"
+                    >
+                      <div className="relative w-20 h-20 flex-shrink-0">
+                        <img
+                          src={item.image}
+                          alt={item.productTitle}
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{item.productTitle}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.variant.size} • {item.variant.color}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <div className="flex items-center border rounded-md">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <span className="px-3 py-1">{item.quantity}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeItem(item.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                        {item.quantity > 1 && (
+                          <p className="text-sm text-muted-foreground">
+                            ${item.price.toFixed(2)} each
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Form İçeriği */}
-          <AnimatePresence mode="wait">
-            {currentStep === 'kargo' && (
-              <motion.div
-                key="kargo"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-              >
-                <h2 className="text-2xl font-bold mb-6">Kargo Bilgileri</h2>
-                <form onSubmit={handleKargoSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="email">E-posta Adresi</Label>
+          {/* Checkout Form */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ödeme Bilgileri</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Customer Info */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Müşteri Bilgileri</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="fullName">Ad Soyad</Label>
+                        <Input
+                          id="fullName"
+                          value={formData.fullName}
+                          onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Telefon</Label>
+                        <Input
+                          id="phone"
+                          value={formData.phone}
+                          onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         type="email"
-                        value={kargoVerisi.email}
-                        onChange={(e) => setKargoVerisi({ ...kargoVerisi, email: e.target.value })}
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                         required
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="telefon">Telefon Numarası</Label>
+                  </div>
+
+                  {/* Address Info */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Adres Bilgileri</h4>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Adres</Label>
                       <Input
-                        id="telefon"
-                        type="tel"
-                        value={kargoVerisi.telefon}
-                        onChange={(e) => setKargoVerisi({ ...kargoVerisi, telefon: e.target.value })}
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                         required
                       />
                     </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="city">Şehir</Label>
+                        <Input
+                          id="city"
+                          value={formData.city}
+                          onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="state">İlçe</Label>
+                        <Input
+                          id="state"
+                          value={formData.state}
+                          onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="zipCode">Posta Kodu</Label>
+                        <Input
+                          id="zipCode"
+                          value={formData.zipCode}
+                          onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="tamAd">Tam Ad</Label>
-                    <Input
-                      id="tamAd"
-                      value={kargoVerisi.tamAd}
-                      onChange={(e) => setKargoVerisi({ ...kargoVerisi, tamAd: e.target.value })}
-                      required
-                    />
+                  {/* Shipping Method */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Kargo Seçimi</h4>
+                    <div className="space-y-2">
+                      <Label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="standard"
+                          checked={formData.shippingMethod === 'standard'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, shippingMethod: e.target.value as 'standard' | 'express' }))}
+                          className="mr-2"
+                        />
+                        <div className="flex items-center justify-between w-full">
+                          <span>Standart Kargo (5$)</span>
+                          <span className="text-sm text-muted-foreground">3-5 iş günü</span>
+                        </div>
+                      </Label>
+                      <Label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="express"
+                          checked={formData.shippingMethod === 'express'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, shippingMethod: e.target.value as 'standard' | 'express' }))}
+                          className="mr-2"
+                        />
+                        <div className="flex items-center justify-between w-full">
+                          <span>Express Kargo (15$)</span>
+                          <span className="text-sm text-muted-foreground">1-2 iş günü</span>
+                        </div>
+                      </Label>
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="adres">Adres</Label>
-                    <Input
-                      id="adres"
-                      value={kargoVerisi.adres}
-                      onChange={(e) => setKargoVerisi({ ...kargoVerisi, adres: e.target.value })}
-                      required
-                    />
+                  {/* Payment Method */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Ödeme Yöntemi</h4>
+                    <div className="space-y-2">
+                      <Label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="card"
+                          checked={formData.paymentMethod === 'card'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value as 'card' | 'paypal' | 'applepay' }))}
+                          className="mr-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          <span>Kredi Kartı</span>
+                        </div>
+                      </Label>
+                      <Label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="paypal"
+                          checked={formData.paymentMethod === 'paypal'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value as 'card' | 'paypal' | 'applepay' }))}
+                          className="mr-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <span>PayPal</span>
+                        </div>
+                      </Label>
+                      <Label className="flex items-center">
+                        <input
+                          type="radio"
+                          value="applepay"
+                          checked={formData.paymentMethod === 'applepay'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value as 'card' | 'paypal' | 'applepay' }))}
+                          className="mr-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <span>Apple Pay</span>
+                        </div>
+                      </Label>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="sehir">Şehir</Label>
+                  {/* Promo Code */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Promosyon Kodu</h4>
+                    <div className="flex gap-2">
                       <Input
-                        id="sehir"
-                        value={kargoVerisi.sehir}
-                        onChange={(e) => setKargoVerisi({ ...kargoVerisi, sehir: e.target.value })}
-                        required
+                        placeholder="Promosyon kodu"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
                       />
+                      <Button
+                        type="button"
+                        onClick={handlePromoApply}
+                        disabled={promoApplied}
+                      >
+                        Uygula
+                      </Button>
                     </div>
-                    <div>
-                      <Label htmlFor="ilce">İlçe</Label>
-                      <Input
-                        id="ilce"
-                        value={kargoVerisi.ilce}
-                        onChange={(e) => setKargoVerisi({ ...kargoVerisi, ilce: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="postaKodu">Posta Kodu</Label>
-                      <Input
-                        id="postaKodu"
-                        value={kargoVerisi.postaKodu}
-                        onChange={(e) => setKargoVerisi({ ...kargoVerisi, postaKodu: e.target.value })}
-                        required
-                      />
+                    {promoApplied && (
+                      <Badge variant="secondary" className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        10% indirim uygulandı
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Order Summary */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold">Sipariş Özeti</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Alt Toplam:</span>
+                        <span>${subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Kargo:</span>
+                        <span>${shippingCost.toFixed(2)}</span>
+                      </div>
+                      {discount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>İndirim:</span>
+                          <span>-${discount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <Separator />
+                      <div className="flex justify-between font-semibold text-lg">
+                        <span>Toplam:</span>
+                        <span>${total.toFixed(2)}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="ulke">Ülke</Label>
-                    <Input
-                      id="ulke"
-                      value={kargoVerisi.ulke}
-                      onChange={(e) => setKargoVerisi({ ...kargoVerisi, ulke: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="adresKaydet"
-                      checked={kargoVerisi.adresKaydet}
-                      onCheckedChange={(checked) => setKargoVerisi({ ...kargoVerisi, adresKaydet: Boolean(checked) })}
-                    />
-                    <Label htmlFor="adresKaydet">Adresimi kaydet</Label>
-                  </div>
-
-                  <div className="flex justify-between items-center mt-6">
-                    <Button type="button" variant="outline" onClick={() => router.push('/cart')}>
-                      <ChevronLeft className="mr-2 h-4 w-4" /> Sepete Dön
-                    </Button>
-                    <Button type="submit">
-                      Ödeme Bilgilerine Devam Et <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? 'İşleniyor...' : `Ödeme Yap - $${total.toFixed(2)}`}
+                  </Button>
                 </form>
-              </motion.div>
-            )}
-
-            {currentStep === 'odeme' && (
-              <motion.div
-                key="odeme"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-              >
-                <h2 className="text-2xl font-bold mb-6">Ödeme Bilgileri</h2>
-                <RadioGroup
-                  value={odemeVerisi.yontem}
-                  onValueChange={(value) => setOdemeVerisi({ ...odemeVerisi, yontem: value as 'kart' | 'paypal' | 'applepay' })}
-                  className="space-y-2 mb-6"
-                >
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                    <RadioGroupItem value="kart" id="kart" />
-                    <Label htmlFor="kart">Kredi/Banka Kartı</Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                    <RadioGroupItem value="paypal" id="paypal" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { useInViewRef } from '@/lib/utils';
 import { useRef } from 'react';
+import { BannerModule } from '@/components/BannerModule';
 
 // Typing Effect Component
 function TypingEffect({ text, className = '' }: { text: string; className?: string }) {
@@ -102,11 +102,11 @@ export default function HomePage() {
           >
             <Badge className="mb-6 bg-primary/10 text-primary border-primary/20">
               <Sparkles className="mr-2 h-4 w-4" />
-              AI Destekli Alışveriş
+              Moda Alışveriş
             </Badge>
 
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              <TypingEffect text="Tarzınızı AI ile Keşfedin" className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60" />
+              <TypingEffect text="Stilinizi Keşfedin" className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60" />
             </h1>
 
             <motion.p
@@ -115,7 +115,7 @@ export default function HomePage() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-xl md:text-2xl text-muted-foreground mb-8"
             >
-              Gelişmiş AI teknolojisi ile güçlendirilen kişiselleştirilmiş moda önerileri deneyin
+              En trend modayı keşfedin, kişisel tarzınızı bulun
             </motion.p>
 
             <motion.div
@@ -128,12 +128,6 @@ export default function HomePage() {
                 <Link href="/products">
                   <ShoppingBag className="mr-2 h-5 w-5" />
                   Hemen Alışveriş Yap
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
-                <Link href="/style-quiz">
-                  Stil Testi Çöz
-                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </motion.div>
@@ -152,6 +146,13 @@ export default function HomePage() {
         )}
       </section>
 
+      {/* Banner Module */}
+      <section className="py-12 bg-background">
+        <div className="container mx-auto px-4">
+          <BannerModule />
+        </div>
+      </section>
+
       {/* Featured Categories */}
       <section ref={categoriesRef} className="py-20 bg-background">
         <div className="container mx-auto px-4">
@@ -161,9 +162,9 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Shop by Category</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Kategoriler</h2>
             <p className="text-muted-foreground text-lg">
-              Explore our curated collection
+              En sevdiğiniz kategorileri keşfedin
             </p>
           </motion.div>
 
@@ -182,10 +183,10 @@ export default function HomePage() {
                     <div className="relative h-full w-full flex flex-col items-center justify-center p-6">
                       <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        {category.productCount} Products
+                        {category.productCount} Ürün
                       </p>
                       <Button variant="outline" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        Explore
+                        Keşfet
                       </Button>
                     </div>
                   </div>
@@ -208,24 +209,24 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-primary" />
-                <Badge variant="secondary">Hot Right Now</Badge>
+                <Badge variant="secondary">Popüler</Badge>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold">Trending Now</h2>
+              <h2 className="text-3xl md:text-4xl font-bold">Trend Ürünler</h2>
               <p className="text-muted-foreground text-lg mt-2">
-                Discover what's popular in our store
+                En çok satan ve trend ürünler
               </p>
             </div>
             <Button variant="outline" className="mt-4 md:mt-0" asChild>
-              <Link href="/products">View All Products</Link>
+              <Link href="/products">Tüm Ürünleri Gör</Link>
             </Button>
           </motion.div>
 
           {/* Filter Chips */}
           <div className="flex flex-wrap gap-2 mb-8">
-            {['All', 'Clothing', 'Shoes', 'Accessories', 'Sale'].map((filter) => (
+            {['Tümü', 'Giyim', 'Ayakkabı', 'Aksesuar', 'İndirim'].map((filter) => (
               <Button
                 key={filter}
-                variant={filter === 'All' ? 'default' : 'outline'}
+                variant={filter === 'Tümü' ? 'default' : 'outline'}
                 size="sm"
               >
                 {filter}
@@ -253,7 +254,7 @@ export default function HomePage() {
               onClick={handleLoadMore}
               disabled={loadingMore}
             >
-              {loadingMore ? 'Loading...' : 'Load More Products'}
+              {loadingMore ? 'Yükleniyor...' : 'Daha Fazla Ürün'}
             </Button>
           </motion.div>
         </div>
@@ -271,14 +272,14 @@ export default function HomePage() {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Sparkles className="h-6 w-6 text-primary" />
               <Badge className="bg-primary/10 text-primary border-primary/20">
-                AI Powered
+                Önerilenler
               </Badge>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Picked Just For You
+              Size Özel Öneriler
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Based on AI analysis of style preferences and trending patterns
+              En popüler ve trend ürünleri keşfedin
             </p>
           </motion.div>
 
@@ -307,8 +308,8 @@ export default function HomePage() {
             className="text-center mt-12"
           >
             <Button size="lg" asChild>
-              <Link href="/style-quiz">
-                Take Style Quiz for More Recommendations
+              <Link href="/products">
+                Daha Fazla Ürün Keşfedin
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -327,26 +328,26 @@ export default function HomePage() {
           >
             <div className="rounded-2xl border bg-background/50 backdrop-blur-sm p-8 md:p-12 text-center shadow-xl">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Get 10% Off Your First Order
+                %10 İndirim Kazanın
               </h2>
               <p className="text-muted-foreground text-lg mb-8">
-                Subscribe to our newsletter for exclusive offers, new arrivals, and style tips
+                Yeni ürünler, kampanyalar ve moda ipuçları için bültenimize abone olun
               </p>
 
               <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
                 <Input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="E-posta adresinizi girin"
                   className="flex-1"
                   required
                 />
                 <Button type="submit" size="lg" className="px-8">
-                  Subscribe
+                  Abone Ol
                 </Button>
               </form>
 
               <p className="text-xs text-muted-foreground mt-4">
-                By subscribing, you agree to our Privacy Policy. Unsubscribe anytime.
+                Kampanyalarımızdan haberdar olmak için abone olabilirsiniz.
               </p>
             </div>
           </motion.div>

@@ -1,3 +1,4 @@
+export const tr = {
   // Product Detail
   productDetail: {
     home: 'Ana Sayfa',
@@ -28,4 +29,4 @@
     showAiDescription: 'Yapay Zeka Geliştirilmiş Açıklamayı Göster',
     hideAiDescription: 'Yapay Zeka Geliştirilmiş Açıklamayı Gizle',
   },
-
+};

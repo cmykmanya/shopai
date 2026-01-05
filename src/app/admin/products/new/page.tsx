@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ProductImageUpload } from "@/components/ProductImageUpload";
 import { ProductVariantForm } from "@/components/ProductVariantForm";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function NewProductPage() {
   const [title, setTitle] = useState("");
